@@ -276,13 +276,14 @@ apt_update(){
 # Run the stig script on the repository and reboot
 stig_repo(){
 # aptly serve should be ran on boot by systemd, keeping reboot here
-  echo "Y" | /bin/bash -c "~/SecOnion-Ubuntu1604-Deployer/so-stig-sealing/so-stig-sealing";
+  cd ~/SecOnion_Aptly_Deployer/so-stig-sealing/;
+  echo "Y" | /bin/bash -c "~/SecOnion_Aptly_Deployer/so-stig-sealing/so-stig-sealing";
 
   touch aptly_serve.sh;
-  chmod aptly_serve.sh;
+  chmod +x aptly_serve.sh;
   echo "aptly serve" >> aptly_serve.sh;
   cp aptly_serve.sh /etc/init.d/;
-  sed 's/.*exit.*/aptly_serve.sh\n&/' /etc/rc.local;
+  sed -i -e 's/.*exit.*/aptly_serve.sh\n&/' /etc/rc.local;
 #aptly serve;
 
   reboot;
@@ -316,7 +317,7 @@ fi
 #config_script
 #sym_link
 ##mirror_list
-aptly
-export_key
-apt_update
+#aptly
+#export_key
+#apt_update
 stig_repo
