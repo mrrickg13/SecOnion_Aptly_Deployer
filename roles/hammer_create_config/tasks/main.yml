@@ -1,0 +1,101 @@
+#
+# Set all the details required by Satellite to provision the SO node.
+# Variables can be set in ../../group_vars/SecOnion_vars.yml
+#
+
+# Medium not used but it is required by Satellite
+- name: Create Sec Onion Medium
+  shell: |
+    hammer medium create --path http://{{repo_IP}}/ubuntu/ \
+    --name "{{ sec_onion_medium }}" \
+    --os-family Debian --organizations "{{default_org}}" \
+    --locations "{{default_location}}"
+  register: icpt
+  failed_when: icpt.rc >= 1 and icpt.rc != 65
+
+
+- name: Hammer-Create Sec Onion Operating System
+  shell: |
+    hammer os create --architectures x86_64 --name "{{ sec_OS }}" \
+    --major 16 --minor 4 \
+    --password-hash SHA512 --organization "{{default_org}}" \
+    --partition-tables "Preseed default" \
+    --location "{{default_location}}" --family "Debian" --release-name xenial \
+    --media "{{ sec_onion_medium }}" #`hammer medium list | grep "{{ sec_onion_medium }}" | cut -f 1 -d ' '` \
+  register: icpt
+  failed_when: icpt.rc >= 1 and icpt.rc != 65
+
+- name: Render Sec Onion provision template
+  template:
+    src: ./docs/provisioning_template.j2
+    dest: /tmp/security_onion_provisioning.tmpl
+
+- name: Hammer-Create Sec Onion provision template
+  register: icpt
+  failed_when: icpt.rc >= 1 and icpt.rc != 65
+  shell: |
+    hammer template create --name "{{ prov_templ }}" --file /tmp/security_onion_provisioning.tmpl \
+    --locations "{{default_location}}" --operatingsystems "{{ sec_OS }} 16.4" \
+    --organizations "{{default_org}}" \
+    --type PXELinux
+
+- name: Hammer-Update Sec Onion provision template
+  shell: |
+    hammer template update --name "{{ prov_templ }}" --locations "{{default_location}}" --operatingsystems "{{ sec_OS }} 16.4" --organizations "{{default_org}}"
+
+
+- name: Hammer-Update Sec Onion Operating System  provision template
+  shell: |
+    hammer os set-default-template \
+    --id `hammer os list --per-page 9999 |grep "{{ sec_OS }} 16.4"|cut -f 1 -d ' '` \
+    --config-template-id `hammer template list --search {{ prov_templ }} |grep "{{ prov_templ }}"|cut -f 1 -d ' '`
+  register: icpt
+  failed_when: icpt.rc >= 1 and icpt.rc != 65
+
+# Location can be changed, needs to be in web server however
+- name: Render Sec Onion preseed template
+  template:
+    src: ./docs/preseed.j2
+    dest: "{{ preseed_file }}"
+
+#- name: Render Sec Onion preseed template script
+#  template:
+#    src: ./docs/so_config.j2
+#    dest: "{{ preseed_script }}"
+
+
+# Move Kernel and initrd onto Satellite
+- name: Create a directory if it does not exist
+  file:
+    path: /var/lib/tftpboot/boot/
+    state: directory
+
+- name: Create a directory if it does not exist
+  file:
+    path: /var/lib/tftpboot/boot/ubuntu
+    state: directory
+
+
+- name: Move kernel
+  copy:
+    src: ./docs/linux
+    dest: "{{ kernel_loc }}"
+
+- name: Move init
+  copy:
+    src: ./docs/initrd.gz
+    dest: "{{ init_loc }}"
+
+- name: Create a Sec Onion hostgroup
+  register: icpt
+  failed_when: icpt.rc >= 1 and icpt.rc != 65
+  shell: |
+    hammer hostgroup create --name "{{ sec_OS }}" \
+    --architecture "x86_64" --operatingsystem "{{ sec_OS }} 16.4" \
+    --medium "{{ sec_onion_medium }}" \
+    --realm "{{ domain|upper }}" --domain "{{ domain }}" --subnet "api" \
+    --pxe-loader "PXELinux BIOS" --organization "{{ default_org }}" --location "{{ default_location }}" \
+    --partition-table "Preseed default" --root-pass "1qaz2wsx!QAZ@WSX" \
+    --lifecycle-environment Library --content-view "Default Organization View" \
+    --environment production --content-source "satellite.{{ domain }}" \
+    --medium "{{ sec_onion_medium }}" --partition-table "Preseed default"

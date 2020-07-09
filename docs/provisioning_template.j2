@@ -1,0 +1,19 @@
+
+<%#
+kind: PXELinux
+name: PXELinux default memdisk
+model: ProvisioningTemplate
+oses:
+- FreeBSD (memdisk image)
+%>
+MENU TITLE Booting unknown host (ESC to stop)
+TIMEOUT 20
+ONTIMEOUT so_ubuntu
+DEFAULT so_ubuntu
+
+LABEL so_ubuntu
+  MENU LABEL Security Onion ISO
+  # Kernel linux and initrd.gz file located on Satellite server
+  # Full path in this scope: /var/lib/tftpboot/boot/ubuntu/
+  KERNEL /boot/ubuntu/linux
+  APPEND  initrd=/boot/ubuntu/initrd.gz netcfg/choose_interface={{ pxe_inter }} priority=critical auto-install/enable=true preseed/url=http://{{ sat_IP }}{{ preseed_loc }}preseed.cfg 

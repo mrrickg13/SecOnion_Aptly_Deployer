@@ -1,0 +1,58 @@
+######################################
+#                                    #
+# Command variables to be            #
+# filled out prior to running the    #
+# hammer playbook based on the needs #
+# of the environment.                #
+#                                    #
+######################################
+
+# IP of the VM used as a package repository
+repo_IP: "10.52.51.206"
+
+## Preseed file configuration variables
+# The username and pwd need to match here and in the inven file
+username: "localuser"
+usr_pwd: "12345678"
+
+# If in virtual environment, this will be vda/b/c/d....etc
+part_disk: "sdd"
+
+# Multiple default partition types too choose from
+# multi = var/, tmp/, /, home/
+#  see ../docs/supplemental_docs/ubuntu_preseed.txt 
+part_type: "multi"
+
+# Custom partition sizes in mb
+root_size: "16000"
+home_size: "30000"
+var_log_audit_size: "10000"
+var_log_size: "8000"
+tmp_size: "8000"
+var_lib_docker_size: "10000"
+
+# Swap size as % of available RAM
+swap_size: "100%"
+
+hostname: "SecOnion-Node"
+
+## Hammer/Sattelite variables
+# Medium, Operating System, Provisioning Template
+sec_onion_medium: "Security_Onion_PXE"
+sec_OS: "Security_Onion"
+prov_templ: "SecOnion_provision"
+kernel_loc: "/var/lib/tftpboot/boot/ubuntu"
+init_loc: "/var/lib/tftpboot/boot/ubuntu"
+
+# Place the preseed on Satellite within a web server
+# Full path currently: /var/www/html/pub/ubuntu/kickstart/
+preseed_loc: "/pub/ubuntu/kickstart/"
+preseed_file: "/var/www/html/pub/ubuntu/kickstart/preseed.cfg"
+#preseed_script: "/var/www/html/pub/ubuntu/kickstart/so_config.sh"
+
+# If interface is known prior
+pxe_inter: "eno7"
+
+# Ansible Server
+engine: "10.52.51.2"
+

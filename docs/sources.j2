@@ -1,0 +1,15 @@
+#################################################
+# 						#
+# This file replaces the /etc/apt/sources.list  #
+#  file on the Security Onion node that is      #
+#  created. It points to the repository that    #
+#  is built to be accessed offline.             #
+#						#
+#################################################
+
+
+
+deb [trusted=yes] http://{{repo_IP}}/ubuntu/ xenial main restricted universe
+deb [trusted=yes] http://{{repo_IP}}/ubuntu/ xenial-updates main universe
+deb [trusted=yes] http://{{repo_IP}}/ubuntu/ xenial-security main universe
+deb [trusted=yes] http://{{repo_IP}}/securityonion/ xenial main

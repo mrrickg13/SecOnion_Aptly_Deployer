@@ -1,0 +1,172 @@
+#######################################################
+# 						      # 
+# This preseed.cfg file is essentially a kickstart    #
+#  file used by Ubuntu. Not all options are listed.   #
+#  For a full list of options, see 		      #
+#  ./supplimental_docs/ubuntu_preseed.txt 	      #
+#						      #	
+#######################################################
+
+## Guide: https://help.ubuntu.com/lts/installation-guide/s390x/apbs04.html
+
+#d-i auto-install/enable boolean true
+d-i debconf/priority string critical
+d-i pkgsel/update-policy select none
+
+## Preseeding only locale sets language, country and locale.
+d-i debian-installer/locale string en_US.UTF-8
+d-i debian-installer/country string US
+d-i debian-installer/language string en
+d-i localechooser/supported-locales multiselect en_US.UTF-8
+
+## Controls whether or not the hardware clock is set to UTC.
+d-i clock-setup/utc boolean true
+
+## You may set this to any valid setting for $TZ; see the contents of
+## /usr/share/zoneinfo/ for valid values.
+d-i time/zone string America/New_York
+
+## Keyboard selection.
+## Disable automatic (interactive) keymap detection.
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/xkb-keymap select us
+
+## Boot from VM we set up as mirror
+d-i mirror/http/mirror select us.archive.ubuntu.com
+d-i mirror/http/proxy string http://{{repo_IP}}/ubuntu/
+
+## To create a normal user account.
+d-i passwd/user-fullname string {{ username }}
+d-i passwd/username string {{ username }}
+# Normal user's password, either in clear text
+d-i passwd/user-password password {{ usr_pwd }}
+d-i passwd/user-password-again password {{ usr_pwd }}
+
+## Network configurations
+## eno7 is enabled in grub file in this setup
+## below are some options to use
+#d-i netcfg/choose_interface select eno7
+#d-i netcfg/choose_interface select auto
+
+## Partitioning
+# Specify disk
+d-i partman-auto/disk string /dev/{{ part_disk }}
+
+## Regular = use partition type for our architecture
+d-i partman-auto/method string regular
+
+## Multi = create separate /home, /var, /tmp partitions
+######d-i partman-auto/choose_recipe select {{ part_type }}
+#partman-auto/text/atomic_scheme ::
+d-i partman-auto/expert_recipe string \
+boot-root :: \
+500 10000 {{ root_size }} ext4 \
+	$primary{ } \
+	$bootable{ } \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ / } . \
+
+500 10000 {{ home_size }} ext4 \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ /home } . \
+
+500 10000 {{ var_log_audit_size }} ext4 \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ /var/log/audit } . \
+
+500 10000 {{ var_log_size }} ext4 \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ /var/log } . \
+
+500 10000 {{ tmp_size }} ext4 \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ /tmp } . \
+
+500 10000 {{ var_lib_docker_size }} ext4 \
+	method{ format } \
+	format{ } \
+	use_filesystem{ } \
+	filesystem{ ext4 } \
+	mountpoint{ /var/lib/docker } . \
+
+64 512 {{ swap_size}} linux-swap \
+	method{ swap } \
+	format{ } .
+
+## Suite to install.
+# This makes partman automatically partition without confirmation, provided
+# that you told it what to do using one of the methods above.
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+
+## Install bootloader on sdd
+d-i grub-installer/bootdev  string /dev/{{ part_disk }}
+d-i grub-installer/only_debian boolean true
+
+## Do not update/upgrade any packages
+d-i pkgsel/update-policy select none
+d-i pkgsel/upgrade select none
+
+## Install desktop
+tasksel tasksel/first multiselect ubuntu-desktop
+
+## Individual additional packages to install
+d-i pkgsel/include string openssh-server build-essential wget mlocate vim lvm2
+
+## Set hostname
+# This overrides any other hostname that may be set (ansible, dhcpd...)
+d-i netcfg/hostname string {{ hostname }}
+
+d-i preseed/late_command string \
+#in-target wget -P /tmp/ http://{{ sat_IP }}{{ preseed_loc }}so_config.sh; \
+in-target wget -P /tmp/ http://{{ repo_IP }}/so_config.sh; \
+in-target chmod +x /tmp/so_config.sh; \
+in-target /bin/sh tmp/so_config.sh; \
+in-target apt install docker.io vim -y; \
+
+in-target wget -P ~/ http://{{ repo_IP }}/elastic.service; \
+in-target wget -P ~/ http://{{ repo_IP }}/stig.service; \
+in-target wget -P ~/ http://{{ repo_IP }}/stig.sh; \
+in-target wget -P ~/ http://{{ repo_IP }}/docker-airgap.tar.gz; \
+in-target wget -P ~/ http://{{ repo_IP }}/so-stig-sealing.tar.gz; \
+in-target wget -P ~/ http://{{ repo_IP }}/airgap.sh; \
+in-target wget -P ~/ http://{{ repo_IP }}/securityonion.key; \
+in-target chmod +x ~/airgap.sh; \
+in-target chmod +x ~/stig.sh; \
+in-target apt-key add /securityonion.key; \
+
+in-target mv ~/elastic.service /etc/systemd/system/; \
+in-target mv ~/airgap.sh /usr/sbin/; \
+in-target mv ~/stig.service /etc/systemd/system/; \
+in-target mv ~/stig.sh /usr/sbin/; \
+
+
+in-target tar -xzvf /docker-airgap.tar.gz; \
+in-target tar -xzvf /so-stig-sealing.tar.gz; \
+
+in-target systemctl start elastic.service; \
+in-target systemctl enable elastic.service; \
+in-target systemctl start stig.service; \
+in-target systemctl enable stig.service
+
+## Reboot when done without 'Installation Complete' message
+#  (and user input)
+d-i finish-install/reboot_in_progress note

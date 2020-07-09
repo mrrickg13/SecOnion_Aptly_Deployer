@@ -1,0 +1,12 @@
+# Add Configuration to satellite
+- hosts: satellite
+  gather_facts: false
+  become: yes
+  vars_files:
+    - "./group_vars/SecOnion_vars.yml"
+    - "/opt/cure/ansible_main/group_vars/all.yml"
+  roles:
+    - role: hammer_create_config
+
+
+
