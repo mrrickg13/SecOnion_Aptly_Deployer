@@ -27,7 +27,7 @@
 
 - name: Render Sec Onion provision template
   template:
-    src: ./docs/provisioning_template.j2
+    src: ./files/provisioning_template.j2
     dest: /tmp/security_onion_provisioning.tmpl
 
 - name: Hammer-Create Sec Onion provision template
@@ -55,7 +55,7 @@
 # Location can be changed, needs to be in web server however
 - name: Render Sec Onion preseed template
   template:
-    src: ./docs/preseed.j2
+    src: ./files/preseed.j2
     dest: "{{ preseed_file }}"
 
 #- name: Render Sec Onion preseed template script
@@ -78,12 +78,12 @@
 
 - name: Move kernel
   copy:
-    src: ./docs/linux
+    src: ./files/linux
     dest: "{{ kernel_loc }}"
 
 - name: Move init
   copy:
-    src: ./docs/initrd.gz
+    src: ./files/initrd.gz
     dest: "{{ init_loc }}"
 
 - name: Create a Sec Onion hostgroup
