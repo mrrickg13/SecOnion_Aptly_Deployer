@@ -21,7 +21,7 @@
 # Install necessary software
 install_packages()
 {
-declare -a package_list=(wget openssh-server vim apt-mirror apache2 mlocate git docker docker.io)
+declare -a package_list=(wget openssh-server vim apt-mirror apache2 mlocate git docker docker.io aptly)
 
 for i in "${package_list[@]}"; do
 
@@ -306,16 +306,16 @@ else
     echo -e "\e[34mNo internet connection available, skipping package install, docker and SO repository pull, and apt-mirror creation/update.\e[0m"
 fi
 }
-check_www_connection
-move_so-stig-sealing
-docker_image_tar
-elastic_service
-airgap_script
-stig_service
-stig_script
-config_script
-sym_link
-#mirror_list
+#check_www_connection
+#move_so-stig-sealing
+#docker_image_tar
+#elastic_service
+#airgap_script
+#stig_service
+#stig_script
+#config_script
+#sym_link
+##mirror_list
 aptly
 export_key
 apt_update

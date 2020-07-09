@@ -67,13 +67,14 @@ send_gpg_key(){
   gpg --export -a ${keyVal##*/}  > public.key;
 
  # This part doesnt work during boot, need to scp it over, then ***** apt-key add pubring.gpg to client
-  scp public.key localuser@10.52.51.230:~/
+#  scp public.key localuser@10.52.51.230:~/
 
 }
 
 
 add_ubuntu_gpg() {
   echo " ADDING UBUNTU KEYS FROM KEYSERVER"
+  chown root.root /home/localuser/.gnupg/
   gpg --keyserver keyserver.ubuntu.com --recv-keys 437D05B5 ;
   gpg --keyserver keyserver.ubuntu.com --recv-keys C0B21F32 ;
   gpg --keyserver keyserver.ubuntu.com --recv-keys 23F386C7 ;
@@ -159,11 +160,11 @@ publish_repos(){
 
 # This will serve all publish repositories/snapshots
 # Not recommended for use in production environments
-aptly_serve(){
+#aptly_serve(){
 
  # aptly serve 
 
-}
+#}
 
 ####################################
 #           As they say:           #
