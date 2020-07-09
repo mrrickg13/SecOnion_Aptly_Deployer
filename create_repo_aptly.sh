@@ -277,9 +277,15 @@ apt_update(){
 stig_repo(){
 # aptly serve should be ran on boot by systemd, keeping reboot here
   echo "Y" | /bin/bash -c "~/SecOnion-Ubuntu1604-Deployer/so-stig-sealing/so-stig-sealing";
-aptly serve;
 
-#  reboot;
+  touch aptly_serve.sh;
+  chmod aptly_serve.sh;
+  echo "aptly serve" >> aptly_serve.sh;
+  cp aptly_serve.sh /etc/init.d/;
+  sed 's/.*exit.*/aptly_serve.sh\n&/' /etc/rc.local;
+#aptly serve;
+
+  reboot;
 }
 
 ####################################
