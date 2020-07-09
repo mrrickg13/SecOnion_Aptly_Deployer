@@ -231,7 +231,7 @@ password_complexity()
 if ! grep -q "DoD password" /etc/pam.d/common-password ; then 
     echo -e "\e[32mAdding password complexity requirements to /etc/pam.d/common-password.\e[0m"
     cp files/dod_common-password /etc/pam.d/common-password
-    dpkg -i deb_packages/libpam-cracklib_1.1.8-3.2ubuntu2_amd64.deb > /dev/null
+    #dpkg -i deb_packages/libpam-cracklib_1.1.8-3.2ubuntu2_amd64.deb > /dev/null
 else
     echo -e "\e[34mDoD password complexity requirements already applied.\e[0m"
 fi
@@ -439,8 +439,9 @@ pki_packages()
 PKI_CHECK=$(dpkg -s opensc-pkcs11 2> /dev/null | grep 'install ok installed' > /dev/null ; echo "$?")
 if [ "$PKI_CHECK" == 1 ] ; then
     echo -e "\e[32mInstalling PKI packages.\e[0m"
-    dpkg -i deb_packages/opensc-pkcs11_0.15.0-1ubuntu1_amd64.deb > /dev/null
-    dpkg -i deb_packages/libpam-pkcs11_0.6.8-4_amd64.deb > /dev/null
+    apt install opensc-pkcs11 libpam-pkcs11
+    #dpkg -i deb_packages/opensc-pkcs11_0.15.0-1ubuntu1_amd64.deb > /dev/null
+    #dpkg -i deb_packages/libpam-pkcs11_0.6.8-4_amd64.deb > /dev/null
 else 
     echo -e "\e[34mPKI packages already installed.\e[0m"
 fi
