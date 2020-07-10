@@ -284,11 +284,13 @@ stig_repo(){
   cd ~/SecOnion_Aptly_Deployer/so-stig-sealing/;
   echo "Y" | /bin/bash -c "~/SecOnion_Aptly_Deployer/so-stig-sealing/so-stig-sealing";
 
-  mv ~/SecOnion_Aptly_Deployer/files/aptly_serve.sh /etc/init.d/;
-  chmod +x /etc/init.d/aptly_serve.sh;
+  cp ~/SecOnion_Aptly_Deployer/files/aptly_serve.sh ~/;
+  (crontab -l 2>/dev/null; echo "@reboot ~/.aptly_serve.sh") | crontab -
+  #mv ~/SecOnion_Aptly_Deployer/files/aptly_serve.sh /etc/init.d/;
+  #chmod +x /etc/init.d/aptly_serve.sh;
   #echo "aptly serve" > aptly_serve.sh;
   #cp aptly_serve.sh /etc/init.d/;
-  sed -i -e 's/.*exit.*/aptly_serve.sh\n&/' /etc/rc.local;
+  #sed -i -e 's/.*exit.*/aptly_serve.sh\n&/' /etc/rc.local;
 #aptly serve;
 
   reboot;
