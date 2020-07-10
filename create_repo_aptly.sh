@@ -236,6 +236,8 @@ keyVal=$(gpg --list-keys | awk '/pub/{if (length($2) > 0) print $2}');
   #scp localuser@$HOST_IP:~/pubring.gpg .;
   wget -P ~/ http://@HOST_IP:/pubring.gpg;
   apt-key add pubring.gpg;
+  
+  sudo systemctl restart networking;
 " >> so_config.sh
 
 mv so_config.sh /var/www/html;
