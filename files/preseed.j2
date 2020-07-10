@@ -32,8 +32,11 @@ d-i console-setup/ask_detect boolean false
 d-i keyboard-configuration/xkb-keymap select us
 
 ## Boot from VM we set up as mirror
-d-i mirror/http/mirror select us.archive.ubuntu.com
-d-i mirror/http/proxy string http://{{repo_IP}}/ubuntu/
+
+d-i debian-installer/allow_unauthenticated boolean true
+d-i choose-mirror/country string manual
+d-i choose-mirror/http/hostname string {{ repo_IP }}:8080
+d-i choose-mirror/http/proxy string http://{{repo_IP}}:8080
 
 ## To create a normal user account.
 d-i passwd/user-fullname string {{ username }}
