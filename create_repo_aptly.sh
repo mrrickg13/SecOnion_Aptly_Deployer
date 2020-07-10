@@ -67,7 +67,7 @@ move_so-stig-sealing(){
 DIR=/var/www/html
 FILE=so-stig-sealing.tar.gz
    
-    cd ~/SecOnion-Ubuntu1604-Deployer/ 
+    cd ~/SecOnion_Aptly_Deployer/ 
     tar -czf $DIR/$FILE so-stig-sealing
     chmod 644 $DIR/$FILE;
 
@@ -80,7 +80,7 @@ DIR=/var/www/html/
 FILE=docker-airgap.tar.gz
 
   echo -e "\e[34mMovign docker tar file to web server directory\e[0m"
-  cd ~/SecOnion-Ubuntu1604-Deployer/
+  cd ~/SecOnion_Aptly_Deployer/
   tar -czf $FILE securityonion-docker-airgap;
   mv $FILE $DIR;
 
@@ -273,8 +273,7 @@ export_key(){
 apt_update(){
 
   # K.I.S.S
-  apt update;
-
+  apt update -y && apt upgrade -y;
 }
 
 # Run the stig script on the repository and reboot
