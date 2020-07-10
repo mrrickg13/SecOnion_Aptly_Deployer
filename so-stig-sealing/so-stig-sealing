@@ -231,7 +231,7 @@ password_complexity()
 if ! grep -q "DoD password" /etc/pam.d/common-password ; then 
     echo -e "\e[32mAdding password complexity requirements to /etc/pam.d/common-password.\e[0m"
     cp files/dod_common-password /etc/pam.d/common-password
-    apt install libpam-cracklib -y;
+    apt install libpam-cracklib -y --allow-unauthenticated;
     #dpkg -i deb_packages/libpam-cracklib_1.1.8-3.2ubuntu2_amd64.deb > /dev/null
 else
     echo -e "\e[34mDoD password complexity requirements already applied.\e[0m"
@@ -407,8 +407,8 @@ auditd()
 #Set Max_log_file_action from Rotate to Syslog
 if [ ! -f "/etc/audit/auditd.conf" ] ; then
     echo -e "\e[32mApplying auditd settings.\e[0m"
-    apt install auditd audispd-plugins -y;
-    apt install libauparse-dev libprelude-dev -y;
+    apt install auditd audispd-plugins -y --allow-unauthenticated;
+    apt install libauparse-dev libprelude-dev -y --allow-unauthenticated;
     #dpkg -i deb_packages/libauparse0_2.4.5-1ubuntu2.1_amd64.deb > /dev/null
     #dpkg -i deb_packages/auditd_2.4.5-1ubuntu2_amd64.deb >  /dev/null
     #dpkg -i deb_packages/libprelude2v5_1.0.0-11.7ubuntu1_amd64.deb > /dev/null
@@ -440,7 +440,7 @@ pki_packages()
 PKI_CHECK=$(dpkg -s opensc-pkcs11 2> /dev/null | grep 'install ok installed' > /dev/null ; echo "$?")
 if [ "$PKI_CHECK" == 1 ] ; then
     echo -e "\e[32mInstalling PKI packages.\e[0m"
-    apt install opensc-pkcs11 libpam-pkcs11
+    apt install opensc-pkcs11 libpam-pkcs11 -y --allow-unauthenticated;
     #dpkg -i deb_packages/opensc-pkcs11_0.15.0-1ubuntu1_amd64.deb > /dev/null
     #dpkg -i deb_packages/libpam-pkcs11_0.6.8-4_amd64.deb > /dev/null
 else 
@@ -472,7 +472,7 @@ VLOCK_CHECK=$(dpkg -s vlock 2> /dev/null | grep 'install ok installed' > /dev/nu
 if [ "$VLOCK_CHECK" == 1 ] ; then
     echo -e "\e[32mInstalling vlock.\e[0m"
     # Added by Sealing Tech
-    apt install vlock -y;
+    apt install vlock -y --allow-unauthenticated; 
     #dpkg -i deb_packages/vlock_2.2.2-5_amd64.deb > /dev/null
 else
     echo -e "\e[34mvlock already installed.\e[0m"
