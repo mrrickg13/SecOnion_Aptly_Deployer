@@ -229,9 +229,12 @@ keyVal=$(gpg --list-keys | awk '/pub/{if (length($2) > 0) print $2}');
   echo "${keyVal##*/}";
   gpg --no-default-keyring -a --export ${keyVal##*/} | gpg --no-default-keyring --keyring ~/.gnupg/trustedkeys.gpg --import - ;
   gpg --export -a ${keyVal##*/}  > public.key;
-  scp public.key localuser@$HOST_IP:~/
-  cp /home/localuser/.gnupg/pubring.gpg /home/localuser/;
-  scp localuser@$HOST_UP:~/pubring.gpg .;
+  
+  #scp public.key localuser@$HOST_IP:~/
+  
+  #cp /home/localuser/.gnupg/pubring.gpg /var/www/html/;
+  #scp localuser@$HOST_IP:~/pubring.gpg .;
+  wget http://@HOST_IP:/pubring.gpg -P .;
   apt-key add pubring.gpg;
 " >> so_config.sh
 
@@ -257,9 +260,10 @@ aptly() {
   ./run_aptly.sh
 }
 
-# Export the SO key so the node can update
+# Export the SO key so the node can update and move pubring so node can grab it
 export_key(){
 
+  cp /home/localuser/.gnupg/pubring.gpg /var/www/html/
   apt-key export > securityonion.key;
   mv securityonion.key /var/www/html/;
 
