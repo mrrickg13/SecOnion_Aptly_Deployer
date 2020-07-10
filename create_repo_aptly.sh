@@ -234,7 +234,7 @@ keyVal=$(gpg --list-keys | awk '/pub/{if (length($2) > 0) print $2}');
   
   #cp /home/localuser/.gnupg/pubring.gpg /var/www/html/;
   #scp localuser@$HOST_IP:~/pubring.gpg .;
-  wget http://@HOST_IP:/pubring.gpg -P .;
+  wget -P ~/ http://@HOST_IP:/pubring.gpg;
   apt-key add pubring.gpg;
 " >> so_config.sh
 
