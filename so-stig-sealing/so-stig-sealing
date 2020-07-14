@@ -601,6 +601,18 @@ else
 fi
 }
 
+################################
+#  Set timezone to GMT         #
+#  STIG Vul ID's: 75817        #
+#  Added by: Sealing Tech      #
+###############################
+set_timezone()
+{
+  sudo timedatectl set-timezone UTC;
+}
+
+
+
 #################################
 #  Where the Magic Happens !!!  #
 #################################
@@ -630,4 +642,5 @@ wuzah_rule
 file_ownership
 sticky_bit
 apt_tool
+set_timezone
 #reboot_question
