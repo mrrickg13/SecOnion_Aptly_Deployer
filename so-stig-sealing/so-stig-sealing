@@ -579,7 +579,7 @@ if [ -s invalid_user_group ]; then
 
            echo -e "\e[34mAll files have valid User/Group assigned.\e[0m"
        else
-           echo "STIG Vul ID's: 75555, 75557 will remain a finding until approprate file permissions have been assigned to the files listed in the $INVALID_USER_CHECK file"
+           echo "STIG Vul ID's: 75555, 75557 will remain a finding until appropriate file permissions have been assigned to the files listed in the $INVALID_USER_CHECK file"
        fi
 else 
     echo -e "\e[34mAll files have valid User/Group assigned.\e[0m"
@@ -602,13 +602,30 @@ fi
 }
 
 ################################
-#  Set timezone to GMT         #
-#  STIG Vul ID's: 75817        #
+#  Miscellaneous               #
+#  STIG Vul ID's: below        #
 #  Added by: Sealing Tech      #
 ###############################
-set_timezone()
+misc()
 {
+  # Set timezone to UTC, V-75817
+  echo -e "\e[34mSetting timezone to UTC.\e[0m"
   sudo timedatectl set-timezone UTC;
+
+  # Enable apparmor service, V75537
+  systemctl ebable apparmor;
+
+  # Set permissions on /var/log/audit, V-75637
+  chmod 750 /var/log/audit/;
+
+  # Require pam lastlog, V-75497
+  if  grep -q "session    optional   pam_lastlog.so" /etc/pam.d/login ; then
+    echo -e "\e[32mRequiring pam lastlog settings.\e[0m"
+    sed -i 's|session    optional   pam_lastlog.so|session    required    pam_lastlog.so showfailed|g' /etc/pam.d/login;
+  fi
+  if grep -q "session    required    pam_lastlog.so showfailed" /etc/pam.d/login ; then
+    echo -e "\e[32mPam lastlog settings already configured.\e[0m"
+  fi
 }
 
 
@@ -642,5 +659,5 @@ wuzah_rule
 file_ownership
 sticky_bit
 apt_tool
-set_timezone
+misc
 #reboot_question
