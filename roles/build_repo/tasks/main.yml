@@ -1,0 +1,12 @@
+- name: Build  VM FOR RICK
+  become: yes
+  shell: |
+    virt-customize -a /tmp/95732821-05e6-4298-9e5d-ce3b2a84f42d #--commands-from-file /tmp/virt-idm
+    virt-install -n SOUbuntuRepository --autostart --vcpus=sockets=1,cores=2 --memory=4000 --os-type=linux --os-variant=ubuntu16.04 --disk "/tmp/95732821-05e6-4298-9e5d-ce3b2a84f42d,cache=unsafe,io=threads,device=disk,bus=virtio" -w   bridge=virbr0,model=virtio --vnc --noautoconsole --import --cpu host,+vmx
+
+
+- name: Autostart IDM vm
+  virt:
+    name: SOUbuntuRepository
+    autostart: yes
+

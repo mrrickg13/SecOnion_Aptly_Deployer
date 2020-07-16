@@ -1,0 +1,115 @@
+- name: Obtain SSO token with using username/password credentials
+  delegate_to: localhost
+  ovirt_auth:
+    url: "https://engine.{{domain}}/ovirt-engine/api"
+    username: admin@internal
+    password: "{{pw_list.engine_admin_pass}}"
+
+- name: Get SSH Key
+  delegate_to: localhost
+  command: "cat /root/.ssh/id_rsa.pub"
+  register: ssh_key
+
+
+
+
+
+#
+#- name: build out test VM from template
+#  delegate_to: localhost
+#  ovirt_vm:
+#    auth: "{{ ovirt_auth }}"
+#    state: running
+#    clone: yes
+#    type: server
+#    name: RICKUbuntuTest
+#    cpu_cores: 2
+#    memory: 4GiB
+#    template: UbuntuRepository
+#    #cpu_cores: "{{ vm_cores }}"
+#    #memory: "{{ vm_memory }}"
+#    #template: "{{ vm_template }}"
+#    cluster: Kit{{ kit_num }}Cluster
+#    cloud_init_nics:
+#      - nic_name: eth0
+#        nic_boot_protocol: dhcp # "{{ vm_nic_protocol }}"
+#        #nic_ip_address: "{{ vm_nic_ip }}"
+#        nic_netmask: 255.255.255.0 #"{{ vm_nic_subnet }}"
+#        nic_gateway: 10.52.51.1 #"{{ vm_nic_gateway }}"
+#        nic_on_boot: true
+#    cloud_init:
+#      host_name: RICKUbuntuRepo
+#      #host_name: "{{ inventory_hostname }}"
+#      user_name: root
+#      root_password: "{{ lookup('password', '/root/.passwords/eroot length=32 chars=ascii_letters,digits') }}"
+#      authorized_ssh_keys: "{{ ssh_key.stdout }}"
+#
+#
+#
+# Build IDM VM
+
+#- name: Check for IDM VM
+#  become: yes
+#  virt:
+#    command: list_vms
+#  register: vm_list
+#
+
+
+#- name: Build IDM virtual disk
+#  when: "not 'idm' in vm_list.list_vms"
+#  become: yes
+#  shell: |
+ #   qemu-img create -f qcow2 /home/rgould/SO-AptlyDeployer-Final_disk1/idm.qcow2 30G
+
+
+
+#- name: Copy RHEL qcow template to virtual disk and resize
+#  when: "not 'idm' in vm_list.list_vms"
+#  become: yes
+#  shell: |
+#    virt-resize --expand /dev/vda3 {{libvirt_disk_loc}}/rhel-template.qcow2 {{libvirt_disk_loc}}/idm.qcow2
+#- name: Template IDM VM settings
+#  when: "not 'idm' in vm_list.list_vms"
+#  vars:
+#    vm_name: idm
+#    vm_password: "{{passwords.idm_root_pass}}"
+#  template:
+#    src: files/virt-config.j2
+#    dest: /tmp/virt-idm
+#
+#- name: Template IDM network settings
+#  when: "not 'idm' in vm_list.list_vms"
+#  vars:
+#    interface: eth0
+#    interface_ip: "{{idm_ip}}"
+#    interface_gw: "{{operator_gateway}}"
+#    default_route: "yes"
+#    dns1: "{{idm_ip}}"
+#    dns2: "{{external_dns}}"
+#  template:
+#    src: files/ifcfg-default.j2
+#    dest: /tmp/ifcfg-eth0
+#
+- name: Build  VM
+  #when: "not 'idm' in vm_list.list_vms"
+  become: yes
+  shell: |
+    #virt-customize -a {{libvirt_disk_loc}}/idm.qcow2 --commands-from-file /tmp/virt-idm
+    virt-customize -a /tmp/95732821-05e6-4298-9e5d-ce3b2a84f42d #--commands-from-file /tmp/virt-idm
+    virt-install -n SOUbuntuRepository --autostart --vcpus=sockets=1,cores=2 --memory 4G --os-type=linux --os-variant=ubuntu16.04 --disk "/tmp/95732821-05e6-4298-9e5d-ce3b2a84f42d,cache=unsafe,io=threads,device=disk,bus=virtio" -w   bridge={{libvirt_bridge_management}},model=virtio --vnc --noautoconsole --import --cpu host,+vmx
+  #  virt-install -n idm --autostart --vcpus=sockets=1,cores={{idm_cpu_cores}} --memory {{idm_memory}} --os-type=linux --os-variant=rhel7 --disk "{{libvirt_disk_loc}}/idm.qcow2,cache=unsafe,io=threads,device=disk,bus=virtio" -w   bridge={{libvirt_bridge_management}},model=virtio --vnc --noautoconsole --import --cpu host,+vmx
+
+
+- name: Autostart IDM vm
+  virt:
+    name: SOUbuntuRepository
+    autostart: yes
+
+#- name: Cleanup tmp files
+#  file:
+#    path: "{{item}}"
+#    state: absent
+#  with_items:
+#    - /tmp/ifcfg-eth0
+#    - /tmp/virt-idm

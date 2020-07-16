@@ -1,0 +1,12 @@
+# Add Configuration to satellite
+- hosts: master
+  gather_facts: false
+  become: yes
+  vars_files:
+    - "./group_vars/SecOnion_vars.yml"
+    - "/opt/cure/ansible_main/group_vars/all.yml"
+    - "/opt/cure/ansible_main/passwords.yml"
+  roles:
+    - role: build_repo
+
+

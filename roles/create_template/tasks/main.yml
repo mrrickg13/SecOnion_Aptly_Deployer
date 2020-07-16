@@ -1,0 +1,34 @@
+- name: Obtain SSO token with using username/password credentials
+  delegate_to: localhost
+  ovirt_auth:
+    url: "https://engine.{{domain}}/ovirt-engine/api"
+    username: admin@internal
+    password: "{{pw_list.engine_admin_pass}}"
+
+#- name: Ensure VM is stopped before making the template
+#  ovirt_vm:
+#    auth: "{{ ovirt_auth }}"
+#    state: stopped
+#    name: SO-AptlyDeployer-Final
+#
+
+#- name: VM Creds
+#  delegate_to: localhost
+#  ovirt_auth:
+#    username: localuser
+#    password: 12345678
+
+
+
+
+
+# MAKE SURE FORMAT ====== QCOW
+# Create template from vm
+- name: Create Template
+  ovirt_template:
+    auth: "{{ ovirt_auth }}"
+    cluster: Kit52Cluster
+    name: UbuntuRepository
+    vm: SO-AptlyDeployer-Final
+    #cpu_profile: Default
+    description: Template of provisioned Ubuntu Repository for Security Onion
